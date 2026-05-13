@@ -1,0 +1,1246 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#FAF6EE">
+  <title>Mimi pulseras</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    html, body { margin: 0; padding: 0; background: #FAF6EE; overscroll-behavior: none; font-family: 'Manrope', system-ui, sans-serif; }
+    * { -webkit-tap-highlight-color: transparent; }
+    #loading { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 12px; color: #6E665A; font-family: 'Fraunces', serif; font-size: 18px; }
+    #loading::after { content: ""; width: 24px; height: 24px; border: 3px solid #D6CDB8; border-top-color: #A93226; border-radius: 50%; animation: sp 0.8s linear infinite; }
+    @keyframes sp { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <div id="root"><div id="loading">Cargando Mimi pulseras…</div></div>
+
+  <script crossorigin src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.24.7/babel.min.js"></script>
+
+  <script type="text/babel" data-presets="react">
+    const { useState, useEffect, useRef, useMemo, useCallback } = React;
+
+
+// =================== MIYUKI DELICA PALETTE ===================
+const PALETTE = [
+  { code: 'DB0010', name: 'Negro mate', hex: '#1A1A1A', group: 'negros' },
+  { code: 'DB0001', name: 'Negro brillante', hex: '#0A0A0A', group: 'negros' },
+  { code: 'DB0301', name: 'Gris hematita', hex: '#3A3A3A', group: 'negros' },
+  { code: 'DB1456', name: 'Gris ahumado', hex: '#7A7A7A', group: 'negros' },
+  { code: 'DB1136', name: 'Gris perla', hex: '#B0B0B0', group: 'negros' },
+  { code: 'DB0200', name: 'Blanco perla', hex: '#F5EFE3', group: 'blancos' },
+  { code: 'DB0202', name: 'Blanco crema', hex: '#F0E6D2', group: 'blancos' },
+  { code: 'DB0220', name: 'Marfil', hex: '#EFE2C0', group: 'blancos' },
+  { code: 'DB1490', name: 'Crema mate', hex: '#E8DCC0', group: 'blancos' },
+  { code: 'DB0723', name: 'Rojo opaco', hex: '#B71C1C', group: 'rojos' },
+  { code: 'DB0791', name: 'Rojo cereza', hex: '#C62828', group: 'rojos' },
+  { code: 'DB0654', name: 'Rojo coral', hex: '#E53935', group: 'rojos' },
+  { code: 'DB0214', name: 'Rojo oscuro', hex: '#7F1D1D', group: 'rojos' },
+  { code: 'DB0775', name: 'Rojo ladrillo', hex: '#A93226', group: 'rojos' },
+  { code: 'DB0207', name: 'Rosa claro', hex: '#F8BBD0', group: 'rosas' },
+  { code: 'DB1371', name: 'Rosa chicle', hex: '#EC407A', group: 'rosas' },
+  { code: 'DB0625', name: 'Rosa fucsia', hex: '#D81B60', group: 'rosas' },
+  { code: 'DB1342', name: 'Rosa palo', hex: '#F4A6B8', group: 'rosas' },
+  { code: 'DB1379', name: 'Rosa neón', hex: '#FF3D7F', group: 'rosas' },
+  { code: 'DB0651', name: 'Naranja brillante', hex: '#FF6F00', group: 'naranjas' },
+  { code: 'DB0722', name: 'Naranja calabaza', hex: '#F57C00', group: 'naranjas' },
+  { code: 'DB0653', name: 'Melocotón', hex: '#FFAB91', group: 'naranjas' },
+  { code: 'DB0703', name: 'Terracota', hex: '#BF360C', group: 'naranjas' },
+  { code: 'DB0721', name: 'Amarillo limón', hex: '#FFEB3B', group: 'amarillos' },
+  { code: 'DB0734', name: 'Amarillo dorado', hex: '#F9A825', group: 'amarillos' },
+  { code: 'DB0233', name: 'Mostaza', hex: '#E1AD01', group: 'amarillos' },
+  { code: 'DB1132', name: 'Mantequilla', hex: '#FFF59D', group: 'amarillos' },
+  { code: 'DB0656', name: 'Verde hoja', hex: '#388E3C', group: 'verdes' },
+  { code: 'DB0274', name: 'Verde oscuro', hex: '#1B5E20', group: 'verdes' },
+  { code: 'DB0046', name: 'Verde lima', hex: '#9CCC65', group: 'verdes' },
+  { code: 'DB0163', name: 'Verde menta', hex: '#A5D6A7', group: 'verdes' },
+  { code: 'DB0747', name: 'Oliva', hex: '#827717', group: 'verdes' },
+  { code: 'DB0859', name: 'Turquesa', hex: '#26A69A', group: 'verdes' },
+  { code: 'DB1496', name: 'Musgo', hex: '#558B2F', group: 'verdes' },
+  { code: 'DB0726', name: 'Azul cobalto', hex: '#1565C0', group: 'azules' },
+  { code: 'DB0727', name: 'Azul cielo', hex: '#42A5F5', group: 'azules' },
+  { code: 'DB0216', name: 'Azul marino', hex: '#0D47A1', group: 'azules' },
+  { code: 'DB0079', name: 'Azul turquesa', hex: '#00BCD4', group: 'azules' },
+  { code: 'DB0164', name: 'Azul claro', hex: '#90CAF9', group: 'azules' },
+  { code: 'DB0177', name: 'Azul royal', hex: '#1976D2', group: 'azules' },
+  { code: 'DB1768', name: 'Azul medianoche', hex: '#1A237E', group: 'azules' },
+  { code: 'DB1486', name: 'Azul polvo', hex: '#B3CDE3', group: 'azules' },
+  { code: 'DB0661', name: 'Morado oscuro', hex: '#4A148C', group: 'morados' },
+  { code: 'DB0782', name: 'Lavanda', hex: '#9575CD', group: 'morados' },
+  { code: 'DB0249', name: 'Lila', hex: '#CE93D8', group: 'morados' },
+  { code: 'DB0277', name: 'Violeta', hex: '#7B1FA2', group: 'morados' },
+  { code: 'DB1345', name: 'Berenjena', hex: '#311B92', group: 'morados' },
+  { code: 'DB0769', name: 'Chocolate', hex: '#3E2723', group: 'marrones' },
+  { code: 'DB0764', name: 'Canela', hex: '#8D6E63', group: 'marrones' },
+  { code: 'DB0772', name: 'Marrón claro', hex: '#A1887F', group: 'marrones' },
+  { code: 'DB1131', name: 'Café', hex: '#5D4037', group: 'marrones' },
+  { code: 'DB0031', name: 'Oro 24k', hex: '#D4AF37', group: 'metalicos' },
+  { code: 'DB0035', name: 'Plata galvanizada', hex: '#C0C0C0', group: 'metalicos' },
+  { code: 'DB0040', name: 'Cobre', hex: '#B87333', group: 'metalicos' },
+  { code: 'DB1832', name: 'Oro rosa', hex: '#B76E79', group: 'metalicos' },
+  { code: 'DB0021', name: 'Bronce', hex: '#CD7F32', group: 'metalicos' },
+];
+
+const GROUPS = [
+  { id: 'todos', label: 'Todos' },
+  { id: 'negros', label: 'Negros' },
+  { id: 'blancos', label: 'Blancos' },
+  { id: 'rojos', label: 'Rojos' },
+  { id: 'rosas', label: 'Rosas' },
+  { id: 'naranjas', label: 'Naranjas' },
+  { id: 'amarillos', label: 'Amarillos' },
+  { id: 'verdes', label: 'Verdes' },
+  { id: 'azules', label: 'Azules' },
+  { id: 'morados', label: 'Morados' },
+  { id: 'marrones', label: 'Marrones' },
+  { id: 'metalicos', label: 'Metálicos' },
+];
+
+// =================== MOTIFS ===================
+// Values: 0 = skip, 1 = paint with selectedColor, 2 = erase to empty
+const MOTIFS = {
+  corazon_p: { name: 'Corazón', grid: [
+    [0,1,0,1,0],
+    [1,1,1,1,1],
+    [1,1,1,1,1],
+    [0,1,1,1,0],
+    [0,0,1,0,0],
+  ]},
+  corazon_g: { name: 'Corazón grande', grid: [
+    [0,1,1,0,0,1,1,0],
+    [1,1,1,1,1,1,1,1],
+    [1,1,1,1,1,1,1,1],
+    [1,1,1,1,1,1,1,1],
+    [0,1,1,1,1,1,1,0],
+    [0,0,1,1,1,1,0,0],
+    [0,0,0,1,1,0,0,0],
+  ]},
+  flecha_d: { name: 'Flecha →', grid: [
+    [0,0,0,0,1,0,0],
+    [0,0,0,0,0,1,0],
+    [1,1,1,1,1,1,1],
+    [0,0,0,0,0,1,0],
+    [0,0,0,0,1,0,0],
+  ]},
+  flecha_i: { name: 'Flecha ←', grid: [
+    [0,0,1,0,0,0,0],
+    [0,1,0,0,0,0,0],
+    [1,1,1,1,1,1,1],
+    [0,1,0,0,0,0,0],
+    [0,0,1,0,0,0,0],
+  ]},
+  flecha_a: { name: 'Flecha ↑', grid: [
+    [0,0,1,0,0],
+    [0,1,1,1,0],
+    [1,1,1,1,1],
+    [0,0,1,0,0],
+    [0,0,1,0,0],
+    [0,0,1,0,0],
+  ]},
+  flecha_b: { name: 'Flecha ↓', grid: [
+    [0,0,1,0,0],
+    [0,0,1,0,0],
+    [0,0,1,0,0],
+    [1,1,1,1,1],
+    [0,1,1,1,0],
+    [0,0,1,0,0],
+  ]},
+  estrella: { name: 'Estrella', grid: [
+    [0,0,1,0,0],
+    [0,1,1,1,0],
+    [1,1,1,1,1],
+    [0,1,0,1,0],
+    [1,0,0,0,1],
+  ]},
+  flor: { name: 'Flor', grid: [
+    [0,1,0,1,0],
+    [1,1,1,1,1],
+    [0,1,1,1,0],
+    [1,1,1,1,1],
+    [0,1,0,1,0],
+  ]},
+  flor_p: { name: 'Flor pequeña', grid: [
+    [0,1,0],
+    [1,1,1],
+    [0,1,0],
+  ]},
+  cruz: { name: 'Cruz', grid: [
+    [0,0,1,0,0],
+    [0,0,1,0,0],
+    [1,1,1,1,1],
+    [0,0,1,0,0],
+    [0,0,1,0,0],
+  ]},
+  rombo: { name: 'Rombo', grid: [
+    [0,0,1,0,0],
+    [0,1,1,1,0],
+    [1,1,1,1,1],
+    [0,1,1,1,0],
+    [0,0,1,0,0],
+  ]},
+  cuadrado: { name: 'Cuadrado', grid: [
+    [1,1,1,1,1],
+    [1,1,1,1,1],
+    [1,1,1,1,1],
+    [1,1,1,1,1],
+    [1,1,1,1,1],
+  ]},
+  circulo: { name: 'Círculo', grid: [
+    [0,1,1,1,0],
+    [1,1,1,1,1],
+    [1,1,1,1,1],
+    [1,1,1,1,1],
+    [0,1,1,1,0],
+  ]},
+  cara: { name: 'Carita feliz', grid: [
+    [0,1,1,1,1,1,0],
+    [1,2,2,2,2,2,1],
+    [1,2,1,2,1,2,1],
+    [1,2,2,2,2,2,1],
+    [1,2,1,2,1,2,1],
+    [1,2,2,1,2,2,1],
+    [0,1,1,1,1,1,0],
+  ]},
+};
+
+// 3x5 alphabet
+const ALPHABET = {
+  A:[[0,1,0],[1,0,1],[1,1,1],[1,0,1],[1,0,1]], B:[[1,1,0],[1,0,1],[1,1,0],[1,0,1],[1,1,0]],
+  C:[[1,1,1],[1,0,0],[1,0,0],[1,0,0],[1,1,1]], D:[[1,1,0],[1,0,1],[1,0,1],[1,0,1],[1,1,0]],
+  E:[[1,1,1],[1,0,0],[1,1,0],[1,0,0],[1,1,1]], F:[[1,1,1],[1,0,0],[1,1,0],[1,0,0],[1,0,0]],
+  G:[[1,1,1],[1,0,0],[1,0,1],[1,0,1],[1,1,1]], H:[[1,0,1],[1,0,1],[1,1,1],[1,0,1],[1,0,1]],
+  I:[[1,1,1],[0,1,0],[0,1,0],[0,1,0],[1,1,1]], J:[[1,1,1],[0,0,1],[0,0,1],[1,0,1],[1,1,1]],
+  K:[[1,0,1],[1,1,0],[1,0,0],[1,1,0],[1,0,1]], L:[[1,0,0],[1,0,0],[1,0,0],[1,0,0],[1,1,1]],
+  M:[[1,0,1],[1,1,1],[1,1,1],[1,0,1],[1,0,1]], N:[[1,0,1],[1,1,1],[1,1,1],[1,1,1],[1,0,1]],
+  O:[[1,1,1],[1,0,1],[1,0,1],[1,0,1],[1,1,1]], P:[[1,1,0],[1,0,1],[1,1,0],[1,0,0],[1,0,0]],
+  Q:[[1,1,1],[1,0,1],[1,0,1],[1,1,1],[0,0,1]], R:[[1,1,0],[1,0,1],[1,1,0],[1,0,1],[1,0,1]],
+  S:[[1,1,1],[1,0,0],[1,1,1],[0,0,1],[1,1,1]], T:[[1,1,1],[0,1,0],[0,1,0],[0,1,0],[0,1,0]],
+  U:[[1,0,1],[1,0,1],[1,0,1],[1,0,1],[1,1,1]], V:[[1,0,1],[1,0,1],[1,0,1],[1,0,1],[0,1,0]],
+  W:[[1,0,1],[1,0,1],[1,1,1],[1,1,1],[1,0,1]], X:[[1,0,1],[1,0,1],[0,1,0],[1,0,1],[1,0,1]],
+  Y:[[1,0,1],[1,0,1],[0,1,0],[0,1,0],[0,1,0]], Z:[[1,1,1],[0,0,1],[0,1,0],[1,0,0],[1,1,1]],
+  '0':[[1,1,1],[1,0,1],[1,0,1],[1,0,1],[1,1,1]], '1':[[0,1,0],[1,1,0],[0,1,0],[0,1,0],[1,1,1]],
+  '2':[[1,1,1],[0,0,1],[1,1,1],[1,0,0],[1,1,1]], '3':[[1,1,1],[0,0,1],[1,1,1],[0,0,1],[1,1,1]],
+  '4':[[1,0,1],[1,0,1],[1,1,1],[0,0,1],[0,0,1]], '5':[[1,1,1],[1,0,0],[1,1,1],[0,0,1],[1,1,1]],
+  '6':[[1,1,1],[1,0,0],[1,1,1],[1,0,1],[1,1,1]], '7':[[1,1,1],[0,0,1],[0,1,0],[1,0,0],[1,0,0]],
+  '8':[[1,1,1],[1,0,1],[1,1,1],[1,0,1],[1,1,1]], '9':[[1,1,1],[1,0,1],[1,1,1],[0,0,1],[1,1,1]],
+  ' ':[[0,0],[0,0],[0,0],[0,0],[0,0]],
+  '+':[[0,0,0],[0,1,0],[1,1,1],[0,1,0],[0,0,0]],
+  '-':[[0,0,0],[0,0,0],[1,1,1],[0,0,0],[0,0,0]],
+  '.':[[0],[0],[0],[0],[1]],
+  '!':[[1],[1],[1],[0],[1]],
+  '?':[[1,1,1],[0,0,1],[0,1,0],[0,0,0],[0,1,0]],
+};
+
+const SYMBOLS = ['●','■','▲','◆','★','✚','✖','◐','♥','♦','♣','♠','✦','✧','✩','✪','✫','✬','✭','◢','◣','◤','◥','◧','◨','◩','◪','◫','❀','❁','❂','❃','❄','❅','❆','❇','❈','❉','❊','❋','✤','✱','✲','✳','✴','✸','❖','▼','◇','○','□','△','◊','♡','♢','✿','❀','✾','❋','✻','✽'];
+
+// =================== BEAD TYPES ===================
+// widthMm = ancho de cada bead en la dirección del patrón (cols)
+// heightMm = altura de cada bead en la dirección del patrón (rows)
+const BEAD_TYPES = [
+  { id: 'delica_11', name: 'Delica 11/0', widthMm: 1.6, heightMm: 1.3, description: 'Cilíndrica japonesa, muy uniforme. La más usada en peyote.', stitches: ['peyote', 'loom'] },
+  { id: 'delica_10', name: 'Delica 10/0', widthMm: 2.2, heightMm: 1.8, description: 'Delica un poco más grande. Tejido algo más rápido.', stitches: ['peyote', 'loom'] },
+  { id: 'delica_8',  name: 'Delica 8/0',  widthMm: 3.0, heightMm: 2.5, description: 'Delica grande. Pulseras chunky, buena para iniciarse.', stitches: ['peyote', 'loom'] },
+  { id: 'delica_15', name: 'Delica 15/0', widthMm: 1.3, heightMm: 1.0, description: 'Delica muy pequeña. Diseños finos y detallados.', stitches: ['peyote', 'loom'] },
+  { id: 'mostacilla_11', name: 'Mostacilla 11/0', widthMm: 2.0, heightMm: 1.5, description: 'Rocalla redonda. Menos uniforme que Delica, más económica.', stitches: ['loom', 'peyote'] },
+  { id: 'mostacilla_8',  name: 'Mostacilla 8/0',  widthMm: 3.0, heightMm: 2.2, description: 'Rocalla mediana. Pulseras de telar rápidas.', stitches: ['loom'] },
+  { id: 'mostacilla_6',  name: 'Mostacilla 6/0',  widthMm: 4.0, heightMm: 3.0, description: 'Rocalla grande. Pulseras llamativas, infantiles.', stitches: ['loom'] },
+  { id: 'canutillo_3',   name: 'Canutillo 3mm',   widthMm: 1.8, heightMm: 3.0, description: 'Tubo de 3mm de largo. Para acentos o filas alargadas.', stitches: ['loom'] },
+  { id: 'canutillo_6',   name: 'Canutillo 6mm',   widthMm: 1.8, heightMm: 6.0, description: 'Tubo de 6mm. Pulseras con efecto rayado vertical.', stitches: ['loom'] },
+  { id: 'canutillo_9',   name: 'Canutillo 9mm',   widthMm: 1.8, heightMm: 9.0, description: 'Tubo de 9mm. Diseños con relieve fuerte.', stitches: ['loom'] },
+];
+
+const THREAD_OPTIONS = [
+  'Nymo D (estándar)',
+  'Nymo B (medio)',
+  'Nymo O (fino)',
+  'Fireline 6lb',
+  'Fireline 8lb',
+  'K.O. Thread',
+  'Wildfire',
+  'C-Lon',
+  'Hilo elástico',
+  'Otro',
+];
+
+const NEEDLE_OPTIONS = [
+  '#10 (gruesa, 8/0 y mayores)',
+  '#11 (estándar, 11/0)',
+  '#12 (fina, 15/0)',
+  '#13 (muy fina)',
+  'Aguja de ojo grande',
+  'Otra',
+];
+
+// =================== COLOR MATCHING ===================
+const hexToRgb = (hex) => [parseInt(hex.slice(1,3),16), parseInt(hex.slice(3,5),16), parseInt(hex.slice(5,7),16)];
+const rgbToLab = (r, g, b) => {
+  r/=255; g/=255; b/=255;
+  const t = (c) => c <= 0.04045 ? c/12.92 : Math.pow((c+0.055)/1.055, 2.4);
+  r=t(r); g=t(g); b=t(b);
+  let x = (r*0.4124 + g*0.3576 + b*0.1805)/0.95047;
+  let y = (r*0.2126 + g*0.7152 + b*0.0722)/1.0;
+  let z = (r*0.0193 + g*0.1192 + b*0.9505)/1.08883;
+  const f = (u) => u > 0.008856 ? Math.cbrt(u) : 7.787*u + 16/116;
+  x=f(x); y=f(y); z=f(z);
+  return [116*y - 16, 500*(x-y), 200*(y-z)];
+};
+const PALETTE_LAB = PALETTE.map(c => { const [r,g,b] = hexToRgb(c.hex); return rgbToLab(r,g,b); });
+const nearestPaletteIndex = (r, g, b) => {
+  const [L,A,B] = rgbToLab(r,g,b);
+  let bi = 0, bd = Infinity;
+  for (let i=0; i<PALETTE_LAB.length; i++) {
+    const [l,a,bb] = PALETTE_LAB[i];
+    const d = (l-L)**2 + (a-A)**2 + (bb-B)**2;
+    if (d < bd) { bd = d; bi = i; }
+  }
+  return bi;
+};
+
+// =================== HELPERS ===================
+const newGrid = (w, h) => Array.from({length: h}, () => Array(w).fill(-1));
+const cloneGrid = (g) => g.map(r => r.slice());
+const STORAGE_KEY = 'mimi_pulseras_v1';
+
+const DEFAULT_DETAILS = {
+  recipient: '',
+  threadType: 'Nymo D (estándar)',
+  needleType: '#11 (estándar, 11/0)',
+  notes: '',
+  status: 'in_progress',
+};
+
+// =================== APP ===================
+function MimiPulseras() {
+  const [width, setWidth] = useState(11);
+  const [height, setHeight] = useState(36);
+  const [stitchType, setStitchType] = useState('peyote');
+  const [beadType, setBeadType] = useState('delica_11');
+  const [details, setDetails] = useState(DEFAULT_DETAILS);
+  const [grid, setGrid] = useState(() => newGrid(11, 36));
+  const [selectedColor, setSelectedColor] = useState(9);
+  const [tool, setTool] = useState('brush');
+  const [zoom, setZoom] = useState(22);
+  const [history, setHistory] = useState([]);
+  const [histIdx, setHistIdx] = useState(-1);
+  const [name, setName] = useState('Mi pulsera');
+  const [groupFilter, setGroupFilter] = useState('todos');
+  const [activeMotif, setActiveMotif] = useState(null);
+  const [textInput, setTextInput] = useState('');
+  const [savedPatterns, setSavedPatterns] = useState([]);
+  const [printMode, setPrintMode] = useState(false);
+  const [imgPreview, setImgPreview] = useState(null);
+  const [tab, setTab] = useState('colores');
+  const [leftOpen, setLeftOpen] = useState(false);
+  const [rightOpen, setRightOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const canvasRef = useRef(null);
+  const isDrawing = useRef(false);
+  const fileInputRef = useRef(null);
+
+  // Mobile detection
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 900);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
+
+  // Load saved patterns
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) setSavedPatterns(JSON.parse(raw));
+    } catch {}
+  }, []);
+
+  // Resize grid when dims change
+  useEffect(() => {
+    setGrid(prev => {
+      const ng = newGrid(width, height);
+      for (let y=0; y<Math.min(height, prev.length); y++)
+        for (let x=0; x<Math.min(width, prev[0]?.length || 0); x++)
+          ng[y][x] = prev[y][x];
+      return ng;
+    });
+  }, [width, height]);
+
+  const pushHistory = useCallback((g) => {
+    setHistory(h => {
+      const trimmed = h.slice(0, histIdx + 1);
+      trimmed.push(cloneGrid(g));
+      if (trimmed.length > 50) trimmed.shift();
+      setHistIdx(trimmed.length - 1);
+      return trimmed;
+    });
+  }, [histIdx]);
+
+  const undo = () => {
+    if (histIdx > 0) { setHistIdx(histIdx - 1); setGrid(cloneGrid(history[histIdx - 1])); }
+    else if (histIdx === 0) { setHistIdx(-1); setGrid(newGrid(width, height)); }
+  };
+  const redo = () => {
+    if (histIdx < history.length - 1) { setHistIdx(histIdx + 1); setGrid(cloneGrid(history[histIdx + 1])); }
+  };
+
+  // === Canvas drawing ===
+  const currentBead = BEAD_TYPES.find(b => b.id === beadType) || BEAD_TYPES[0];
+  const beadRatio = currentBead.heightMm / currentBead.widthMm;
+  const cellW = zoom;
+  const cellH = Math.max(2, Math.round(zoom * beadRatio));
+
+  // Finished physical size estimate
+  const finishedWmm = width * currentBead.widthMm + (stitchType === 'peyote' ? currentBead.widthMm / 2 : 0);
+  const finishedHmm = height * currentBead.heightMm;
+  const finishedSize = `${(finishedWmm / 10).toFixed(1)} × ${(finishedHmm / 10).toFixed(1)} cm`;
+
+  const drawCanvas = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    const W = width * cellW + (stitchType === 'peyote' ? cellW / 2 : 0) + 2;
+    const H = height * cellH + 2;
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = W * dpr;
+    canvas.height = H * dpr;
+    canvas.style.width = W + 'px';
+    canvas.style.height = H + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.fillStyle = '#FAF6EE';
+    ctx.fillRect(0, 0, W, H);
+
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        const ox = (stitchType === 'peyote' && y % 2 === 1) ? cellW / 2 : 0;
+        const px = x * cellW + ox + 1;
+        const py = y * cellH + 1;
+        const ci = grid[y][x];
+        if (ci >= 0) {
+          ctx.fillStyle = PALETTE[ci].hex;
+          ctx.fillRect(px, py, cellW - 1, cellH - 1);
+        } else {
+          ctx.fillStyle = '#FFFFFF';
+          ctx.fillRect(px, py, cellW - 1, cellH - 1);
+        }
+        ctx.strokeStyle = '#D6CDB8';
+        ctx.lineWidth = 0.5;
+        ctx.strokeRect(px, py, cellW - 1, cellH - 1);
+      }
+    }
+  }, [grid, width, height, stitchType, cellW, cellH]);
+
+  useEffect(() => { drawCanvas(); }, [drawCanvas]);
+
+  const pointToCell = (e) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return null;
+    const rect = canvas.getBoundingClientRect();
+    const px = e.clientX - rect.left;
+    const py = e.clientY - rect.top;
+    const y = Math.floor((py - 1) / cellH);
+    if (y < 0 || y >= height) return null;
+    const ox = (stitchType === 'peyote' && y % 2 === 1) ? cellW / 2 : 0;
+    const x = Math.floor((px - 1 - ox) / cellW);
+    if (x < 0 || x >= width) return null;
+    return { x, y };
+  };
+
+  const applyTool = (cell, isFirst) => {
+    if (!cell) return;
+    setGrid(prev => {
+      const g = cloneGrid(prev);
+      if (tool === 'brush') g[cell.y][cell.x] = selectedColor;
+      else if (tool === 'erase') g[cell.y][cell.x] = -1;
+      else if (tool === 'fill') floodFill(g, cell.x, cell.y, selectedColor);
+      else if (tool === 'eyedrop') { if (g[cell.y][cell.x] >= 0) setSelectedColor(g[cell.y][cell.x]); return prev; }
+      if (isFirst) pushHistory(g);
+      return g;
+    });
+  };
+
+  const floodFill = (g, x, y, color) => {
+    const target = g[y][x];
+    if (target === color) return;
+    const stack = [[x, y]];
+    while (stack.length) {
+      const [cx, cy] = stack.pop();
+      if (cx < 0 || cy < 0 || cx >= width || cy >= height) continue;
+      if (g[cy][cx] !== target) continue;
+      g[cy][cx] = color;
+      stack.push([cx+1,cy],[cx-1,cy],[cx,cy+1],[cx,cy-1]);
+    }
+  };
+
+  const handlePointerDown = (e) => {
+    const cell = pointToCell(e);
+    if (!cell) return;
+    if (activeMotif) {
+      stampMotif(cell, activeMotif);
+      setActiveMotif(null);
+      return;
+    }
+    isDrawing.current = true;
+    applyTool(cell, true);
+  };
+  const handlePointerMove = (e) => {
+    if (!isDrawing.current) return;
+    if (tool === 'fill' || tool === 'eyedrop') return;
+    const cell = pointToCell(e);
+    applyTool(cell, false);
+  };
+  const handlePointerUp = () => { isDrawing.current = false; };
+
+  const stampMotif = (cell, motifKey) => {
+    const m = MOTIFS[motifKey];
+    if (!m) return;
+    setGrid(prev => {
+      const g = cloneGrid(prev);
+      const ox = Math.floor(m.grid[0].length / 2);
+      const oy = Math.floor(m.grid.length / 2);
+      for (let dy = 0; dy < m.grid.length; dy++)
+        for (let dx = 0; dx < m.grid[0].length; dx++) {
+          const x = cell.x - ox + dx;
+          const y = cell.y - oy + dy;
+          if (x < 0 || x >= width || y < 0 || y >= height) continue;
+          const val = m.grid[dy][dx];
+          if (val === 1) g[y][x] = selectedColor;
+          else if (val === 2) g[y][x] = -1;
+        }
+      pushHistory(g);
+      return g;
+    });
+  };
+
+  const stampText = () => {
+    const text = textInput.toUpperCase();
+    if (!text) return;
+    const chars = [...text].map(c => ALPHABET[c] || ALPHABET[' ']);
+    const w = chars.reduce((s, c) => s + c[0].length + 1, -1);
+    const h = 5;
+    setGrid(prev => {
+      const g = cloneGrid(prev);
+      let cx = Math.floor((width - w) / 2);
+      const cy = Math.floor((height - h) / 2);
+      for (const ch of chars) {
+        for (let dy = 0; dy < ch.length; dy++)
+          for (let dx = 0; dx < ch[0].length; dx++)
+            if (ch[dy][dx] === 1) {
+              const x = cx + dx, y = cy + dy;
+              if (x >= 0 && x < width && y >= 0 && y < height) g[y][x] = selectedColor;
+            }
+        cx += ch[0].length + 1;
+      }
+      pushHistory(g);
+      return g;
+    });
+    setTextInput('');
+  };
+
+  const handleImageUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const img = new Image();
+      img.onload = () => {
+        const off = document.createElement('canvas');
+        off.width = width;
+        off.height = height;
+        const oc = off.getContext('2d');
+        oc.imageSmoothingEnabled = true;
+        oc.drawImage(img, 0, 0, width, height);
+        const data = oc.getImageData(0, 0, width, height).data;
+        const newG = newGrid(width, height);
+        for (let y = 0; y < height; y++)
+          for (let x = 0; x < width; x++) {
+            const i = (y * width + x) * 4;
+            const r = data[i], g = data[i+1], b = data[i+2], a = data[i+3];
+            if (a < 128) { newG[y][x] = -1; continue; }
+            newG[y][x] = nearestPaletteIndex(r, g, b);
+          }
+        setGrid(newG);
+        pushHistory(newG);
+        setImgPreview(ev.target?.result);
+      };
+      img.src = ev.target?.result;
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const savePattern = () => {
+    const p = { id: Date.now(), name, width, height, stitchType, beadType, grid, details, savedAt: new Date().toISOString() };
+    const next = [p, ...savedPatterns.filter(s => s.name !== name)].slice(0, 50);
+    setSavedPatterns(next);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+    alert('Patrón guardado: ' + name);
+  };
+  const loadPattern = (p) => {
+    setName(p.name);
+    setWidth(p.width);
+    setHeight(p.height);
+    setStitchType(p.stitchType);
+    if (p.beadType) setBeadType(p.beadType);
+    if (p.details) setDetails(p.details);
+    setGrid(p.grid);
+    setHistory([cloneGrid(p.grid)]);
+    setHistIdx(0);
+    setRightOpen(false);
+  };
+  const deletePattern = (id) => {
+    const next = savedPatterns.filter(s => s.id !== id);
+    setSavedPatterns(next);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+  };
+  const newPattern = () => {
+    if (!confirm('¿Crear patrón nuevo? Se perderán cambios no guardados.')) return;
+    const g = newGrid(width, height);
+    setGrid(g);
+    setHistory([cloneGrid(g)]);
+    setHistIdx(0);
+    setName('Mi pulsera');
+    setDetails(DEFAULT_DETAILS);
+    setLeftOpen(false);
+  };
+
+  const beadCounts = useMemo(() => {
+    const counts = {};
+    for (const row of grid)
+      for (const ci of row)
+        if (ci >= 0) counts[ci] = (counts[ci] || 0) + 1;
+    return Object.entries(counts).map(([i, n]) => ({ index: +i, count: n })).sort((a, b) => b.count - a.count);
+  }, [grid]);
+
+  const totalBeads = beadCounts.reduce((s, c) => s + c.count, 0);
+
+  const filteredPalette = groupFilter === 'todos'
+    ? PALETTE.map((c, i) => ({...c, idx: i}))
+    : PALETTE.map((c, i) => ({...c, idx: i})).filter(c => c.group === groupFilter);
+
+  if (printMode) {
+    return <PrintView grid={grid} width={width} height={height} stitchType={stitchType}
+      beadType={beadType} beadName={currentBead.name} finishedSize={finishedSize}
+      name={name} details={details} beadCounts={beadCounts} totalBeads={totalBeads} onClose={() => setPrintMode(false)} />;
+  }
+
+  return (
+    <div className="mp-app">
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800&family=Manrope:wght@400;500;600;700&display=swap');
+        * { box-sizing: border-box; }
+        html, body { margin: 0; padding: 0; }
+        .mp-app {
+          font-family: 'Manrope', system-ui, sans-serif;
+          background: #FAF6EE; color: #1F1A14; min-height: 100vh;
+          display: flex; flex-direction: column;
+        }
+        button { font-family: inherit; cursor: pointer; }
+        input, select { font-family: inherit; }
+        .mp-header {
+          background: #FAF6EE; border-bottom: 1px solid #D6CDB8;
+          padding: 12px 20px; display: flex; align-items: center;
+          gap: 16px; flex-wrap: wrap; z-index: 20; position: relative;
+        }
+        .mp-brand { display: flex; align-items: center; gap: 8px; }
+        .mp-brand-mark { font-size: 22px; color: #A93226; }
+        .mp-brand-text { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
+        .mp-name-input {
+          flex: 1; min-width: 160px; font-size: 16px; padding: 8px 12px;
+          background: transparent; border: none; border-bottom: 1px solid #D6CDB8;
+          font-family: 'Fraunces', serif; font-weight: 600; color: #1F1A14; outline: none;
+        }
+        .mp-header-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+        .mp-icon-btn {
+          width: 36px; height: 36px; border: 1px solid #D6CDB8; background: #FAF6EE;
+          border-radius: 8px; font-size: 16px; color: #1F1A14;
+        }
+        .mp-icon-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .mp-primary {
+          padding: 8px 16px; background: #1F1A14; color: #FAF6EE;
+          border: none; border-radius: 8px; font-weight: 600; font-size: 13px;
+        }
+        .mp-secondary {
+          padding: 8px 16px; background: #FAF6EE; color: #1F1A14;
+          border: 1px solid #1F1A14; border-radius: 8px; font-weight: 600; font-size: 13px;
+        }
+        .mp-burger {
+          display: none; width: 40px; height: 40px; border: 1px solid #D6CDB8;
+          border-radius: 8px; background: #FAF6EE; font-size: 18px;
+        }
+        .mp-body { flex: 1; display: flex; overflow: hidden; position: relative; }
+        .mp-left-panel {
+          width: 220px; background: #F2EBD9; border-right: 1px solid #D6CDB8;
+          padding: 16px; display: flex; flex-direction: column; gap: 16px;
+          overflow-y: auto; flex-shrink: 0;
+        }
+        .mp-right-panel {
+          width: 320px; background: #F2EBD9; border-left: 1px solid #D6CDB8;
+          display: flex; flex-direction: column; overflow: hidden; flex-shrink: 0;
+        }
+        .mp-canvas-area {
+          flex: 1; overflow: auto; display: flex; align-items: flex-start;
+          justify-content: center; padding: 24px; background: #FAF6EE;
+          background-image: radial-gradient(circle, #E8DCC0 1px, transparent 1px);
+          background-size: 20px 20px;
+        }
+        .mp-canvas-wrap {
+          background: #FAF6EE; padding: 16px; border-radius: 12px;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 8px 30px rgba(31,26,20,0.06);
+        }
+        .mp-section { display: flex; flex-direction: column; gap: 8px; }
+        .mp-h3 {
+          font-family: 'Fraunces', serif; font-size: 13px; font-weight: 600;
+          margin: 0 0 4px; text-transform: uppercase; letter-spacing: 0.8px; color: #6E665A;
+        }
+        .mp-row { display: flex; gap: 8px; }
+        .mp-label { font-size: 11px; color: #6E665A; flex: 1; }
+        .mp-num {
+          width: 100%; margin-top: 4px; padding: 6px 8px; border: 1px solid #D6CDB8;
+          border-radius: 6px; background: #FAF6EE; font-size: 14px; font-weight: 600;
+        }
+        .mp-toggle {
+          flex: 1; padding: 8px; border: 1px solid #D6CDB8; border-radius: 6px;
+          background: #FAF6EE; font-size: 12px; font-weight: 600;
+        }
+        .mp-toggle.active { background: #1F1A14; color: #FAF6EE; border-color: #1F1A14; }
+        .mp-tool-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+        .mp-tool-btn {
+          padding: 10px; border: 1px solid #D6CDB8; border-radius: 6px;
+          background: #FAF6EE; display: flex; flex-direction: column;
+          align-items: center; justify-content: center; transition: all 0.15s;
+        }
+        .mp-tool-btn:hover { background: #E8DCC0; }
+        .mp-tool-btn.active { background: #1F1A14; color: #FAF6EE; border-color: #1F1A14; }
+        .mp-summary {
+          background: #FAF6EE; border-radius: 8px; padding: 10px;
+          display: flex; flex-direction: column; gap: 4px;
+        }
+        .mp-summary-row {
+          display: flex; justify-content: space-between; font-size: 11px; color: #6E665A;
+        }
+        .mp-tabs { display: flex; border-bottom: 1px solid #D6CDB8; flex-shrink: 0; }
+        .mp-tab {
+          flex: 1; padding: 12px 4px; background: transparent; border: none;
+          border-bottom: 2px solid transparent; font-size: 11px; font-weight: 600;
+          color: #6E665A; text-transform: uppercase;
+        }
+        .mp-tab.active { color: #1F1A14; border-bottom-color: #A93226; }
+        .mp-tab-content {
+          padding: 16px; overflow-y: auto; flex: 1;
+          display: flex; flex-direction: column; gap: 12px;
+        }
+        .mp-selected {
+          display: flex; align-items: center; gap: 10px; padding: 10px;
+          background: #FAF6EE; border-radius: 8px;
+        }
+        .mp-selected-sw {
+          width: 36px; height: 36px; border-radius: 6px; border: 1px solid #8B826E;
+        }
+        .mp-select {
+          width: 100%; padding: 8px; border: 1px solid #D6CDB8; border-radius: 6px;
+          background: #FAF6EE; font-size: 12px;
+        }
+        .mp-palette { display: grid; grid-template-columns: repeat(8, 1fr); gap: 5px; }
+        .mp-swatch {
+          aspect-ratio: 1; border: 1px solid rgba(0,0,0,0.1); border-radius: 4px;
+          cursor: pointer; transition: transform 0.1s; padding: 0;
+        }
+        .mp-swatch:hover { transform: scale(1.1); }
+        .mp-swatch.active { outline: 3px solid #1F1A14; outline-offset: 2px; }
+        .mp-hint { font-size: 11px; color: #6E665A; margin: 0; line-height: 1.5; }
+        .mp-motif-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+        .mp-motif-btn {
+          padding: 10px 6px; border: 1px solid #D6CDB8; border-radius: 8px;
+          background: #FAF6EE; display: flex; flex-direction: column;
+          align-items: center; justify-content: center; min-height: 80px;
+          color: #1F1A14; transition: all 0.15s;
+        }
+        .mp-motif-btn:hover { background: #E8DCC0; }
+        .mp-motif-btn.active { background: #1F1A14; color: #FAF6EE; border-color: #1F1A14; }
+        .mp-input {
+          padding: 10px; border: 1px solid #D6CDB8; border-radius: 6px;
+          background: #FAF6EE; font-size: 14px;
+        }
+        .mp-saved-item {
+          display: flex; align-items: center; gap: 8px; padding: 10px;
+          background: #FAF6EE; border-radius: 8px;
+        }
+        .mp-small-btn {
+          padding: 6px 12px; background: transparent; border: 1px solid #D6CDB8;
+          border-radius: 6px; font-size: 11px; font-weight: 600;
+        }
+        .mp-motif-hint {
+          position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+          background: #1F1A14; color: #FAF6EE; padding: 12px 20px; border-radius: 24px;
+          font-size: 13px; font-weight: 500; box-shadow: 0 8px 24px rgba(0,0,0,0.2); z-index: 100;
+        }
+        .mp-mobile-bar {
+          display: none; position: fixed; bottom: 0; left: 0; right: 0;
+          background: #FAF6EE; border-top: 1px solid #D6CDB8;
+          padding: 10px 16px; gap: 8px; z-index: 30;
+          box-shadow: 0 -2px 12px rgba(0,0,0,0.06);
+        }
+        .mp-mobile-bar button {
+          flex: 1; padding: 12px; border: 1px solid #D6CDB8; border-radius: 8px;
+          background: #FAF6EE; font-weight: 600; font-size: 13px;
+          display: flex; align-items: center; justify-content: center; gap: 6px;
+        }
+        .mp-mobile-bar .color-preview {
+          width: 22px; height: 22px; border-radius: 4px; border: 1px solid #8B826E;
+        }
+        .mp-backdrop {
+          position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+          z-index: 40; display: none;
+        }
+
+        /* ========= MOBILE ========= */
+        @media (max-width: 899px) {
+          .mp-header {
+            padding: 10px 14px; gap: 10px;
+          }
+          .mp-brand-text { font-size: 18px; }
+          .mp-name-input { font-size: 15px; padding: 6px 8px; min-width: 100px; }
+          .mp-burger { display: flex; align-items: center; justify-content: center; }
+          .mp-header-actions { display: none; }
+          .mp-canvas-area { padding: 16px; padding-bottom: 96px; }
+          .mp-canvas-wrap { padding: 10px; }
+          .mp-left-panel {
+            position: fixed; top: 0; bottom: 0; left: 0;
+            width: 85vw; max-width: 300px; z-index: 50;
+            transform: translateX(-100%); transition: transform 0.3s ease;
+            box-shadow: 4px 0 16px rgba(0,0,0,0.1);
+          }
+          .mp-left-panel.open { transform: translateX(0); }
+          .mp-right-panel {
+            position: fixed; top: 0; bottom: 0; right: 0;
+            width: 92vw; max-width: 380px; z-index: 50;
+            transform: translateX(100%); transition: transform 0.3s ease;
+            box-shadow: -4px 0 16px rgba(0,0,0,0.1);
+          }
+          .mp-right-panel.open { transform: translateX(0); }
+          .mp-backdrop.open { display: block; }
+          .mp-mobile-bar { display: flex; }
+          .mp-palette { grid-template-columns: repeat(7, 1fr); gap: 6px; }
+          .mp-swatch { min-width: 32px; min-height: 32px; }
+          .mp-motif-grid { grid-template-columns: repeat(3, 1fr); gap: 10px; }
+          .mp-motif-btn { min-height: 90px; }
+          .mp-tool-btn { padding: 14px 6px; }
+        }
+        /* Hide burger on desktop */
+        @media (min-width: 900px) {
+          .mp-burger { display: none; }
+        }
+      `}</style>
+
+      <header className="mp-header">
+        <button className="mp-burger" onClick={() => setLeftOpen(true)} aria-label="Menú">☰</button>
+        <div className="mp-brand">
+          <span className="mp-brand-mark">✿</span>
+          <span className="mp-brand-text">Mimi pulseras</span>
+        </div>
+        <input className="mp-name-input" value={name} onChange={e => setName(e.target.value)} />
+        <div className="mp-header-actions">
+          <button className="mp-icon-btn" onClick={undo} disabled={histIdx <= -1} title="Deshacer">↶</button>
+          <button className="mp-icon-btn" onClick={redo} disabled={histIdx >= history.length - 1} title="Rehacer">↷</button>
+          <button className="mp-secondary" onClick={newPattern}>Nuevo</button>
+          <button className="mp-secondary" onClick={savePattern}>Guardar</button>
+          <button className="mp-primary" onClick={() => setPrintMode(true)}>Imprimir</button>
+        </div>
+      </header>
+
+      <div className="mp-body">
+        <div className={`mp-backdrop ${(leftOpen || rightOpen) && isMobile ? 'open' : ''}`}
+          onClick={() => { setLeftOpen(false); setRightOpen(false); }} />
+
+        <aside className={`mp-left-panel ${leftOpen ? 'open' : ''}`}>
+          <section className="mp-section">
+            <h3 className="mp-h3">Pulsera</h3>
+            <input className="mp-input" value={name} onChange={e => setName(e.target.value)} placeholder="Nombre de la pulsera" />
+          </section>
+
+          <section className="mp-section">
+            <h3 className="mp-h3">Dimensiones</h3>
+            <div className="mp-row">
+              <label className="mp-label">Ancho<br/>
+                <input type="number" min={3} max={50} value={width} onChange={e => setWidth(Math.max(3, Math.min(50, +e.target.value || 3)))} className="mp-num" />
+              </label>
+              <label className="mp-label">Alto<br/>
+                <input type="number" min={3} max={300} value={height} onChange={e => setHeight(Math.max(3, Math.min(300, +e.target.value || 3)))} className="mp-num" />
+              </label>
+            </div>
+            <div className="mp-row">
+              <button onClick={() => setStitchType('peyote')} className={`mp-toggle ${stitchType === 'peyote' ? 'active' : ''}`}>Peyote</button>
+              <button onClick={() => setStitchType('loom')} className={`mp-toggle ${stitchType === 'loom' ? 'active' : ''}`}>Telar</button>
+            </div>
+          </section>
+
+          <section className="mp-section">
+            <h3 className="mp-h3">Material</h3>
+            <select value={beadType} onChange={e => setBeadType(e.target.value)} className="mp-select">
+              {BEAD_TYPES.map(b => (
+                <option key={b.id} value={b.id}>{b.name}</option>
+              ))}
+            </select>
+            <p className="mp-hint" style={{margin: '2px 0 0'}}>{currentBead.description}</p>
+            <div className="mp-summary" style={{marginTop: 4}}>
+              <div className="mp-summary-row"><span>Tamaño bead</span><strong>{currentBead.widthMm} × {currentBead.heightMm} mm</strong></div>
+              <div className="mp-summary-row"><span>Pulsera final</span><strong>{finishedSize}</strong></div>
+            </div>
+          </section>
+
+          <section className="mp-section">
+            <h3 className="mp-h3">Herramientas</h3>
+            <div className="mp-tool-grid">
+              {[['brush','✎','Pincel'], ['erase','⌫','Borrar'], ['fill','▣','Rellenar'], ['eyedrop','◉','Gotero']].map(([k, ico, lbl]) => (
+                <button key={k} className={`mp-tool-btn ${tool === k ? 'active' : ''}`}
+                  onClick={() => { setTool(k); setActiveMotif(null); }}>
+                  <span style={{fontSize: 20}}>{ico}</span>
+                  <span style={{fontSize: 10, marginTop: 4}}>{lbl}</span>
+                </button>
+              ))}
+            </div>
+          </section>
+
+          <section className="mp-section">
+            <h3 className="mp-h3">Zoom</h3>
+            <input type="range" min={10} max={40} value={zoom} onChange={e => setZoom(+e.target.value)} style={{width: '100%'}} />
+          </section>
+
+          {isMobile && (
+            <section className="mp-section">
+              <h3 className="mp-h3">Acciones</h3>
+              <div className="mp-row"><button className="mp-icon-btn" onClick={undo} disabled={histIdx <= -1} style={{flex: 1}}>↶ Deshacer</button>
+                <button className="mp-icon-btn" onClick={redo} disabled={histIdx >= history.length - 1} style={{flex: 1}}>↷ Rehacer</button></div>
+              <button className="mp-secondary" onClick={newPattern}>Nuevo patrón</button>
+              <button className="mp-secondary" onClick={savePattern}>Guardar</button>
+              <button className="mp-primary" onClick={() => setPrintMode(true)}>Imprimir</button>
+            </section>
+          )}
+
+          <section className="mp-section" style={{marginTop: 'auto'}}>
+            <h3 className="mp-h3">Resumen</h3>
+            <div className="mp-summary">
+              <div className="mp-summary-row"><span>Total beads</span><strong>{totalBeads}</strong></div>
+              <div className="mp-summary-row"><span>Colores</span><strong>{beadCounts.length}</strong></div>
+              <div className="mp-summary-row"><span>Tamaño</span><strong>{height} × {width}</strong></div>
+            </div>
+          </section>
+        </aside>
+
+        <main className="mp-canvas-area">
+          <div className="mp-canvas-wrap">
+            <canvas ref={canvasRef}
+              onPointerDown={handlePointerDown}
+              onPointerMove={handlePointerMove}
+              onPointerUp={handlePointerUp}
+              onPointerLeave={handlePointerUp}
+              style={{cursor: activeMotif ? 'copy' : 'crosshair', touchAction: 'none', display: 'block'}} />
+          </div>
+        </main>
+
+        {activeMotif && (
+          <div className="mp-motif-hint">
+            Pulsa donde colocar <strong>{MOTIFS[activeMotif].name}</strong>
+            <button onClick={() => setActiveMotif(null)} style={{marginLeft: 12, background: 'none', border: 'none', color: '#F4A6B8', textDecoration: 'underline', fontSize: 12, cursor: 'pointer'}}>cancelar</button>
+          </div>
+        )}
+
+        <aside className={`mp-right-panel ${rightOpen ? 'open' : ''}`}>
+          <div className="mp-tabs">
+            {[['colores','Colores'],['motivos','Motivos'],['imagen','Imagen'],['notas','Notas'],['guardar','Guardar']].map(([id, lbl]) => (
+              <button key={id} onClick={() => setTab(id)} className={`mp-tab ${tab === id ? 'active' : ''}`}>{lbl}</button>
+            ))}
+          </div>
+
+          {tab === 'colores' && (
+            <div className="mp-tab-content">
+              <div className="mp-selected">
+                <div className="mp-selected-sw" style={{background: PALETTE[selectedColor].hex}} />
+                <div>
+                  <div style={{fontWeight: 600, fontSize: 13}}>{PALETTE[selectedColor].name}</div>
+                  <div style={{fontFamily: 'monospace', fontSize: 11, color: '#6E665A'}}>{PALETTE[selectedColor].code}</div>
+                </div>
+              </div>
+              <select value={groupFilter} onChange={e => setGroupFilter(e.target.value)} className="mp-select">
+                {GROUPS.map(g => <option key={g.id} value={g.id}>{g.label}</option>)}
+              </select>
+              <div className="mp-palette">
+                {filteredPalette.map(c => (
+                  <button key={c.idx} className={`mp-swatch ${selectedColor === c.idx ? 'active' : ''}`}
+                    onClick={() => { setSelectedColor(c.idx); if (isMobile) setRightOpen(false); }}
+                    style={{background: c.hex}} title={`${c.code} — ${c.name}`} />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {tab === 'motivos' && (
+            <div className="mp-tab-content">
+              <p className="mp-hint">Elige un motivo y pulsa sobre el patrón para colocarlo con el color actual.</p>
+              <div className="mp-motif-grid">
+                {Object.entries(MOTIFS).map(([k, m]) => (
+                  <button key={k} className={`mp-motif-btn ${activeMotif === k ? 'active' : ''}`}
+                    onClick={() => { setActiveMotif(k); if (isMobile) setRightOpen(false); }}>
+                    <MotifPreview motif={m} />
+                    <span style={{fontSize: 11, marginTop: 8, textAlign: 'center'}}>{m.name}</span>
+                  </button>
+                ))}
+              </div>
+              <h3 className="mp-h3" style={{marginTop: 8}}>Texto / Iniciales</h3>
+              <div style={{display: 'flex', gap: 6}}>
+                <input value={textInput} onChange={e => setTextInput(e.target.value)} placeholder="MAMA, A+B..." maxLength={10} className="mp-input" style={{flex: 1}} />
+                <button onClick={stampText} className="mp-primary">Añadir</button>
+              </div>
+            </div>
+          )}
+
+          {tab === 'imagen' && (
+            <div className="mp-tab-content">
+              <p className="mp-hint">Sube una imagen y se convertirá automáticamente al patrón {width}×{height} usando los colores Miyuki más cercanos.</p>
+              <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageUpload} style={{display: 'none'}} />
+              <button onClick={() => fileInputRef.current?.click()} className="mp-primary" style={{width: '100%', padding: 14}}>
+                Elegir imagen…
+              </button>
+              {imgPreview && (
+                <div style={{marginTop: 12}}>
+                  <div className="mp-h3">Imagen original</div>
+                  <img src={imgPreview} style={{width: '100%', borderRadius: 6, border: '1px solid #D6CDB8'}} alt="" />
+                  <p className="mp-hint">Mejor con imágenes simples: logos, siluetas, dibujos planos. Para fotos, usa tamaños grandes (20×30+).</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {tab === 'notas' && (
+            <div className="mp-tab-content">
+              <p className="mp-hint">Detalles del proyecto. Se guardan junto al patrón.</p>
+
+              <label className="mp-label" style={{fontSize: 12, fontWeight: 600, color: '#1F1A14'}}>Para quién
+                <input className="mp-input" value={details.recipient}
+                  onChange={e => setDetails(d => ({...d, recipient: e.target.value}))}
+                  placeholder="Ej: Cumple Marta, regalo Navidad..." style={{width: '100%', marginTop: 4}} />
+              </label>
+
+              <label className="mp-label" style={{fontSize: 12, fontWeight: 600, color: '#1F1A14'}}>Tipo de hilo
+                <select className="mp-select" value={details.threadType}
+                  onChange={e => setDetails(d => ({...d, threadType: e.target.value}))}
+                  style={{marginTop: 4}}>
+                  {THREAD_OPTIONS.map(t => <option key={t} value={t}>{t}</option>)}
+                </select>
+              </label>
+
+              <label className="mp-label" style={{fontSize: 12, fontWeight: 600, color: '#1F1A14'}}>Tipo de aguja
+                <select className="mp-select" value={details.needleType}
+                  onChange={e => setDetails(d => ({...d, needleType: e.target.value}))}
+                  style={{marginTop: 4}}>
+                  {NEEDLE_OPTIONS.map(n => <option key={n} value={n}>{n}</option>)}
+                </select>
+              </label>
+
+              <div>
+                <div className="mp-label" style={{fontSize: 12, fontWeight: 600, color: '#1F1A14', marginBottom: 4}}>Estado</div>
+                <div className="mp-row">
+                  <button onClick={() => setDetails(d => ({...d, status: 'in_progress'}))}
+                    className={`mp-toggle ${details.status === 'in_progress' ? 'active' : ''}`}>En curso</button>
+                  <button onClick={() => setDetails(d => ({...d, status: 'completed'}))}
+                    className={`mp-toggle ${details.status === 'completed' ? 'active' : ''}`}>Terminada</button>
+                </div>
+              </div>
+
+              <label className="mp-label" style={{fontSize: 12, fontWeight: 600, color: '#1F1A14'}}>Notas
+                <textarea className="mp-input" value={details.notes}
+                  onChange={e => setDetails(d => ({...d, notes: e.target.value}))}
+                  rows={6} placeholder="Apuntes, dónde compraste los beads, lo que sea..."
+                  style={{width: '100%', marginTop: 4, fontFamily: 'inherit', resize: 'vertical'}} />
+              </label>
+            </div>
+          )}
+
+          {tab === 'guardar' && (
+            <div className="mp-tab-content">
+              <p className="mp-hint">Patrones guardados en este dispositivo. No se suben a internet.</p>
+              {savedPatterns.length === 0 && <div className="mp-hint" style={{padding: 20, textAlign: 'center'}}>Aún no hay patrones guardados.</div>}
+              {savedPatterns.map(p => {
+                const status = p.details?.status || 'in_progress';
+                const recipient = p.details?.recipient;
+                return (
+                  <div key={p.id} className="mp-saved-item">
+                    <div style={{flex: 1, minWidth: 0}}>
+                      <div style={{display: 'flex', alignItems: 'center', gap: 6}}>
+                        <div style={{fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1}}>{p.name}</div>
+                        <span style={{fontSize: 9, padding: '2px 6px', borderRadius: 10, fontWeight: 700,
+                          background: status === 'completed' ? '#388E3C' : '#E1AD01', color: 'white'}}>
+                          {status === 'completed' ? 'OK' : '...'}
+                        </span>
+                      </div>
+                      <div style={{fontSize: 11, color: '#6E665A'}}>{p.width}×{p.height} · {p.stitchType} · {new Date(p.savedAt).toLocaleDateString()}</div>
+                      {recipient && <div style={{fontSize: 11, color: '#6E665A', fontStyle: 'italic'}}>→ {recipient}</div>}
+                    </div>
+                    <button onClick={() => loadPattern(p)} className="mp-small-btn">Abrir</button>
+                    <button onClick={() => { if (confirm('¿Eliminar?')) deletePattern(p.id); }} className="mp-small-btn" style={{color: '#B71C1C'}}>×</button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </aside>
+      </div>
+
+      {/* Mobile floating bottom bar */}
+      <div className="mp-mobile-bar">
+        <button onClick={() => setLeftOpen(true)}>
+          <span style={{fontSize: 18}}>☰</span>
+          <span>Herramientas</span>
+        </button>
+        <button onClick={() => setRightOpen(true)}>
+          <span className="color-preview" style={{background: PALETTE[selectedColor].hex}} />
+          <span>Colores y motivos</span>
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// =================== MOTIF PREVIEW ===================
+function MotifPreview({ motif }) {
+  const size = 4;
+  const w = motif.grid[0].length * size;
+  const h = motif.grid.length * size;
+  return (
+    <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`}>
+      {motif.grid.map((row, y) => row.map((v, x) => {
+        const px = x * size, py = y * size;
+        if (v === 1) return <rect key={`${x}-${y}`} x={px} y={py} width={size - 0.3} height={size - 0.3} fill="currentColor" />;
+        if (v === 2) return <rect key={`${x}-${y}`} x={px} y={py} width={size - 0.3} height={size - 0.3} fill="none" stroke="currentColor" strokeWidth={0.4} />;
+        return null;
+      }))}
+    </svg>
+  );
+}
+
+// =================== PRINT VIEW ===================
+function PrintView({ grid, width, height, stitchType, beadType, beadName, finishedSize, name, details, beadCounts, totalBeads, onClose }) {
+  const colorSymbols = useMemo(() => {
+    const map = {};
+    beadCounts.forEach((c, i) => { map[c.index] = SYMBOLS[i % SYMBOLS.length]; });
+    return map;
+  }, [beadCounts]);
+
+  const cell = 22;
+  const ch = Math.round(cell * 0.866);
+  const offsetX = stitchType === 'peyote' ? cell / 2 : 0;
+  const W = width * cell + offsetX + 60;
+  const H = height * ch + 60;
+
+  return (
+    <div style={{background: '#E8DCC0', minHeight: '100vh', padding: 20}}>
+      <style>{`
+        @media print {
+          @page { size: A4; margin: 12mm; }
+          .mp-no-print { display: none !important; }
+          body { background: white !important; }
+        }
+        .mp-print-page { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+      `}</style>
+      <div className="mp-no-print" style={{maxWidth: 800, margin: '0 auto 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap'}}>
+        <button onClick={onClose} className="mp-secondary">← Volver al editor</button>
+        <button onClick={() => window.print()} className="mp-primary">Imprimir ahora</button>
+      </div>
+
+      <div className="mp-print-page" style={{maxWidth: 800, margin: '0 auto', background: 'white', padding: 40, boxShadow: '0 4px 24px rgba(0,0,0,0.1)', fontFamily: "'Manrope', sans-serif"}}>
+        <header style={{display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', borderBottom: '2px solid #1F1A14', paddingBottom: 8, marginBottom: 16, flexWrap: 'wrap', gap: 8}}>
+          <h1 style={{fontFamily: 'Fraunces, serif', fontSize: 28, margin: 0, fontWeight: 800}}>{name}</h1>
+          <div style={{fontSize: 12, color: '#6E665A'}}>{width} × {height} · {stitchType === 'peyote' ? 'Peyote' : 'Telar'} · {totalBeads} beads · {finishedSize}</div>
+        </header>
+
+        <section style={{marginBottom: 20, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, fontSize: 11, fontFamily: 'Manrope'}}>
+          <div>
+            <h2 style={{fontFamily: 'Fraunces, serif', fontSize: 13, margin: '0 0 6px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.8, color: '#6E665A'}}>Material</h2>
+            <table style={{width: '100%', fontSize: 11}}>
+              <tbody>
+                <tr><td style={{padding: '2px 0', color: '#6E665A', width: 90}}>Bead</td><td style={{fontWeight: 600}}>{beadName}</td></tr>
+                <tr><td style={{padding: '2px 0', color: '#6E665A'}}>Puntada</td><td style={{fontWeight: 600}}>{stitchType === 'peyote' ? 'Peyote' : 'Telar'}</td></tr>
+                <tr><td style={{padding: '2px 0', color: '#6E665A'}}>Tamaño final</td><td style={{fontWeight: 600}}>{finishedSize}</td></tr>
+                <tr><td style={{padding: '2px 0', color: '#6E665A'}}>Hilo</td><td style={{fontWeight: 600}}>{details.threadType}</td></tr>
+                <tr><td style={{padding: '2px 0', color: '#6E665A'}}>Aguja</td><td style={{fontWeight: 600}}>{details.needleType}</td></tr>
+              </tbody>
+            </table>
+          </div>
+          {(details.recipient || details.notes) && (
+            <div>
+              <h2 style={{fontFamily: 'Fraunces, serif', fontSize: 13, margin: '0 0 6px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.8, color: '#6E665A'}}>Proyecto</h2>
+              {details.recipient && <div style={{marginBottom: 6}}><span style={{color: '#6E665A'}}>Para: </span><strong>{details.recipient}</strong></div>}
+              {details.notes && <div style={{whiteSpace: 'pre-wrap', fontSize: 11, color: '#1F1A14'}}>{details.notes}</div>}
+            </div>
+          )}
+        </section>
+
+        <svg width={W} height={H} style={{display: 'block', marginBottom: 24, maxWidth: '100%'}}>
+          {Array.from({length: width}).map((_, x) => (
+            <text key={`cx-${x}`} x={30 + offsetX + x * cell + cell/2} y={14} fontSize={9} fontFamily="Manrope" textAnchor="middle" fill="#6E665A">{x+1}</text>
+          ))}
+          {grid.map((row, y) => (
+            <g key={y}>
+              <text x={20} y={26 + y * ch + ch/2 + 3} fontSize={9} fontFamily="Manrope" textAnchor="end" fill="#6E665A">{y+1}</text>
+              {row.map((ci, x) => {
+                const ox = (stitchType === 'peyote' && y % 2 === 1) ? cell / 2 : 0;
+                const px = 30 + ox + x * cell;
+                const py = 26 + y * ch;
+                return (
+                  <g key={`${x}-${y}`}>
+                    <rect x={px} y={py} width={cell - 0.5} height={ch - 0.5}
+                      fill={ci >= 0 ? PALETTE[ci].hex : '#FFFFFF'} stroke="#8B826E" strokeWidth={0.4} />
+                    {ci >= 0 && (() => {
+                      const [r, g, b] = hexToRgb(PALETTE[ci].hex);
+                      const lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+                      return <text x={px + cell/2} y={py + ch/2 + 3} fontSize={ch * 0.45} textAnchor="middle" fill={lum > 0.55 ? '#1F1A14' : '#FFFFFF'} fontFamily="serif">{colorSymbols[ci]}</text>;
+                    })()}
+                  </g>
+                );
+              })}
+            </g>
+          ))}
+        </svg>
+
+        <h2 style={{fontFamily: 'Fraunces, serif', fontSize: 16, margin: '20px 0 8px', fontWeight: 600}}>Lista de colores</h2>
+        <table style={{width: '100%', borderCollapse: 'collapse', fontSize: 11, fontFamily: 'Manrope'}}>
+          <thead>
+            <tr style={{borderBottom: '1px solid #1F1A14'}}>
+              <th style={{textAlign: 'left', padding: 6, width: 30}}>Símb.</th>
+              <th style={{textAlign: 'left', padding: 6, width: 30}}>Color</th>
+              <th style={{textAlign: 'left', padding: 6}}>Código</th>
+              <th style={{textAlign: 'left', padding: 6}}>Nombre</th>
+              <th style={{textAlign: 'right', padding: 6}}>Cantidad</th>
+            </tr>
+          </thead>
+          <tbody>
+            {beadCounts.map(c => {
+              const p = PALETTE[c.index];
+              return (
+                <tr key={c.index} style={{borderBottom: '0.5px solid #D6CDB8'}}>
+                  <td style={{padding: 6, fontSize: 14}}>{colorSymbols[c.index]}</td>
+                  <td style={{padding: 6}}><div style={{width: 20, height: 14, background: p.hex, border: '0.5px solid #8B826E'}} /></td>
+                  <td style={{padding: 6, fontFamily: 'monospace'}}>{p.code}</td>
+                  <td style={{padding: 6}}>{p.name}</td>
+                  <td style={{padding: 6, textAlign: 'right', fontWeight: 600}}>{c.count}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<MimiPulseras />);
+  </script>
+</body>
+</html>
