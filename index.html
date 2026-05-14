@@ -339,9 +339,12 @@ function MimiPulseras() {
   const [leftOpen, setLeftOpen] = useState(false);
   const [rightOpen, setRightOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [widthInput, setWidthInput] = useState('11');
+  const [heightInput, setHeightInput] = useState('36');
   const canvasRef = useRef(null);
   const isDrawing = useRef(false);
   const fileInputRef = useRef(null);
+  const importInputRef = useRef(null);
 
   // Mobile detection
   useEffect(() => {
@@ -350,6 +353,21 @@ function MimiPulseras() {
     window.addEventListener('resize', check);
     return () => window.removeEventListener('resize', check);
   }, []);
+
+  // Keep input drafts in sync when width/height change from outside (loadPattern, etc.)
+  useEffect(() => { setWidthInput(String(width)); }, [width]);
+  useEffect(() => { setHeightInput(String(height)); }, [height]);
+
+  const commitWidth = (val) => {
+    const v = Math.max(3, Math.min(50, +val || width));
+    setWidth(v);
+    setWidthInput(String(v));
+  };
+  const commitHeight = (val) => {
+    const v = Math.max(3, Math.min(300, +val || height));
+    setHeight(v);
+    setHeightInput(String(v));
+  };
 
   // Load saved patterns
   useEffect(() => {
@@ -597,6 +615,63 @@ function MimiPulseras() {
     setSavedPatterns(next);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
   };
+  const exportAll = () => {
+    const data = {
+      app: 'mimi-pulseras',
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      patterns: savedPatterns,
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const date = new Date().toISOString().slice(0, 10);
+    a.href = url;
+    a.download = `mimi-pulseras-${date}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleImport = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try {
+        const raw = ev.target?.result;
+        const data = JSON.parse(raw);
+        const imported = Array.isArray(data) ? data : (data.patterns || []);
+        if (!Array.isArray(imported) || imported.length === 0) {
+          alert('El archivo no contiene patrones válidos.');
+          return;
+        }
+        const replace = !confirm(
+          `Encontrados ${imported.length} patrones en el archivo.\n\n` +
+          `Pulsa OK para AÑADIR los nuevos a los actuales (no duplicará nombres).\n` +
+          `Pulsa Cancelar para REEMPLAZAR todos los patrones por los del archivo.`
+        );
+        let next;
+        if (replace) {
+          next = imported.slice(0, 50);
+        } else {
+          const existing = new Set(savedPatterns.map(p => p.name));
+          const toAdd = imported.filter(p => !existing.has(p.name));
+          next = [...savedPatterns, ...toAdd].slice(0, 50);
+        }
+        setSavedPatterns(next);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+        alert(`Importados ${replace ? next.length : next.length - savedPatterns.length} patrones.`);
+      } catch (err) {
+        alert('Error al leer el archivo: ' + (err).message);
+      } finally {
+        if (importInputRef.current) importInputRef.current.value = '';
+      }
+    };
+    reader.readAsText(file);
+  };
+
   const newPattern = () => {
     if (!confirm('¿Crear patrón nuevo? Se perderán cambios no guardados.')) return;
     const g = newGrid(width, height);
@@ -867,10 +942,20 @@ function MimiPulseras() {
             <h3 className="mp-h3">Dimensiones</h3>
             <div className="mp-row">
               <label className="mp-label">Ancho<br/>
-                <input type="number" min={3} max={50} value={width} onChange={e => setWidth(Math.max(3, Math.min(50, +e.target.value || 3)))} className="mp-num" />
+                <input type="number" min={3} max={50}
+                  value={widthInput}
+                  onChange={e => setWidthInput(e.target.value)}
+                  onBlur={e => commitWidth(e.target.value)}
+                  onKeyDown={e => { if (e.key === 'Enter') (e.target).blur(); }}
+                  className="mp-num" />
               </label>
               <label className="mp-label">Alto<br/>
-                <input type="number" min={3} max={300} value={height} onChange={e => setHeight(Math.max(3, Math.min(300, +e.target.value || 3)))} className="mp-num" />
+                <input type="number" min={3} max={300}
+                  value={heightInput}
+                  onChange={e => setHeightInput(e.target.value)}
+                  onBlur={e => commitHeight(e.target.value)}
+                  onKeyDown={e => { if (e.key === 'Enter') (e.target).blur(); }}
+                  className="mp-num" />
               </label>
             </div>
             <div className="mp-row">
@@ -1063,7 +1148,15 @@ function MimiPulseras() {
 
           {tab === 'guardar' && (
             <div className="mp-tab-content">
-              <p className="mp-hint">Patrones guardados en este dispositivo. No se suben a internet.</p>
+              <p className="mp-hint">Patrones guardados en este navegador. Para tenerlos también en otros dispositivos: exporta el archivo, mándatelo y lo importas allí.</p>
+
+              <div style={{display: 'flex', gap: 6}}>
+                <button onClick={exportAll} className="mp-secondary" style={{flex: 1}}
+                  disabled={savedPatterns.length === 0}>↓ Exportar todo</button>
+                <button onClick={() => importInputRef.current?.click()} className="mp-secondary" style={{flex: 1}}>↑ Importar</button>
+                <input ref={importInputRef} type="file" accept=".json,application/json" onChange={handleImport} style={{display: 'none'}} />
+              </div>
+
               {savedPatterns.length === 0 && <div className="mp-hint" style={{padding: 20, textAlign: 'center'}}>Aún no hay patrones guardados.</div>}
               {savedPatterns.map(p => {
                 const status = p.details?.status || 'in_progress';
